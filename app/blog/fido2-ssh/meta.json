@@ -1,0 +1,5 @@
+{
+  "title": "YubiKey SSH Setup for GitHub (WSL2)",
+  "publishedAt": "2026-02-25",
+  "summary": "Set up FIDO2 SSH keys on YubiKeys for GitHub, generating them on Windows and using them from WSL2."
+}

@@ -1,0 +1,190 @@
+import meta from './meta.json'
+import { PostLayout } from '@/app/components/post-layout'
+import { postMetadata } from '@/app/blog/utils'
+
+export const metadata = postMetadata(meta)
+
+<PostLayout meta={meta} slug="fido2-ssh">
+
+This guide covers setting up **FIDO2 SSH keys on YubiKeys** (primary + backup) for GitHub, generating them on **Windows** and using them from **WSL2**.
+
+**Why generate on Windows?** WSL2 runs in a lightweight VM without direct USB access. USB passthrough via `usbipd-win` is unreliable for FIDO2 devices and disables the YubiKey on the Windows host while attached. The Windows OpenSSH client has direct USB access, so we generate keys there and copy the resulting files into WSL2.
+
+---
+
+## 1. Enable FIDO2 Support in WSL
+
+WSL does not directly access USB security keys. Instead, we reuse the Windows OpenSSH FIDO2 helper.
+
+Add this to your `~/.bashrc`:
+
+```bash
+# FIDO2 Support (use Windows OpenSSH security key helper)
+export SSH_SK_HELPER="/mnt/c/Windows/System32/OpenSSH/ssh-sk-helper.exe"
+```
+
+Reload your shell:
+
+```bash
+source ~/.bashrc
+```
+
+This tells the SSH client in WSL to use the Windows FIDO2 handler (`ssh-sk-helper.exe`) to communicate with your hardware key.
+
+---
+
+## 2. Install Updated OpenSSH on Windows
+
+Bugfix for `A resident keyscoped to 'ssh:' with user id 'null' already exists.`
+
+The built-in Windows OpenSSH has a bug where generating multiple resident keys with the same application string silently overwrites the first key on the device ([PowerShell/Win32-OpenSSH#2394](https://github.com/PowerShell/Win32-OpenSSH/issues/2394)). Install `Win32-OpenSSH v10.0.0.0p2-Preview` or later to fix this.
+
+1. Download `OpenSSH-Win64-v10.x.x.x.msi` from: [https://github.com/PowerShell/Win32-OpenSSH/releases](https://github.com/PowerShell/Win32-OpenSSH/releases)
+
+2. Open an **Administrator PowerShell** and run:
+
+```powershell
+msiexec /i OpenSSH-Win64-v10.x.x.x.msi
+```
+
+Reference: [Upgrade in-box OpenSSH to the latest release](https://learn.microsoft.com/en-us/troubleshoot/windows-server/system-management-components/upgrade-in-box-openssh-to-latest-openssh-release#option-1-use-an-msi-installer-to-upgrade-openssh-to-the-latest-github-release)
+
+---
+
+## 3. Generate SSH Keys on Windows
+
+Open an **Administrator PowerShell**. You will create two keys — one for each YubiKey.
+
+### Primary YubiKey
+
+Plug in your **primary** YubiKey, then run:
+
+```powershell
+ssh-keygen -t ed25519-sk -O resident -O verify-required -O application=ssh:github.com -O user=primary -C "primary-yubikey" -f .ssh\id_ed25519_sk_primary
+```
+
+You will be prompted for your YubiKey PIN and a physical touch.
+
+### Backup YubiKey
+
+Unplug the primary, plug in your **backup** YubiKey, then run:
+
+```powershell
+ssh-keygen -t ed25519-sk -O resident -O verify-required -O application=ssh:github.com -O user=backup -C "backup-yubikey" -f .ssh\id_ed25519_sk_backup
+```
+
+### Explanation of Flags
+
+- `-t ed25519-sk` — Ed25519 key backed by a FIDO2 security key (`-sk`).
+- `-O resident` — Store the key as a discoverable (resident) credential on the YubiKey, allowing recovery later.
+- `-O verify-required` — Require PIN or biometric verification before every use.
+- `-O application=ssh:github.com` — Namespace the credential. Both keys share the same application string but are distinguished by `-O user`.
+- `-O user=primary` / `-O user=backup` — Differentiates the two resident credentials on the device so they don't collide.
+- `-C "primary-yubikey"` — Comment embedded in the public key (metadata only, helps identify which key is which).
+- `-f .ssh\id_ed25519_sk_primary` — Output file path. Without this, both keys would default to the same filename and overwrite each other.
+
+---
+
+## 4. Copy Keys to WSL2
+
+From WSL2, copy the four files (two private key stubs + two public keys) from your Windows home directory:
+
+```bash
+cp /mnt/c/Users/<WindowsUser>/.ssh/id_ed25519_sk_primary     ~/.ssh/
+cp /mnt/c/Users/<WindowsUser>/.ssh/id_ed25519_sk_primary.pub ~/.ssh/
+cp /mnt/c/Users/<WindowsUser>/.ssh/id_ed25519_sk_backup      ~/.ssh/
+cp /mnt/c/Users/<WindowsUser>/.ssh/id_ed25519_sk_backup.pub  ~/.ssh/
+```
+
+Fix permissions:
+
+```bash
+chmod 600 ~/.ssh/id_ed25519_sk_primary ~/.ssh/id_ed25519_sk_backup
+chmod 644 ~/.ssh/id_ed25519_sk_primary.pub ~/.ssh/id_ed25519_sk_backup.pub
+```
+
+---
+
+## 5. Configure SSH
+
+Add the following to `~/.ssh/config`:
+
+```
+Host github.com
+    IdentityFile ~/.ssh/id_ed25519_sk_primary
+    IdentityFile ~/.ssh/id_ed25519_sk_backup
+    IdentitiesOnly yes
+    User git
+```
+
+SSH tries keys in the order they appear in the config file. Put the YubiKey you use most often first — SSH will try it before falling back to the other.
+
+---
+
+## 6. Add Keys to GitHub
+
+1. Go to **GitHub → Settings → SSH and GPG Keys**.
+2. Click **New SSH key**.
+3. Paste the contents of `~/.ssh/id_ed25519_sk_primary.pub` and give it a recognizable title (e.g. "Primary YubiKey").
+4. Repeat for `~/.ssh/id_ed25519_sk_backup.pub` (e.g. "Backup YubiKey").
+
+Both keys are now authorized for your GitHub account.
+
+---
+
+## 7. Test
+
+```bash
+ssh -T git@github.com
+```
+
+SSH will try each key in config file order. Plug in the corresponding YubiKey — you will be prompted for a touch. On success:
+
+```
+Hi <username>! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+---
+
+## 8. Important: The Private Key File Is Not the Real Private Key
+
+After generation you will see files like:
+
+```
+~/.ssh/id_ed25519_sk_primary
+~/.ssh/id_ed25519_sk_primary.pub
+~/.ssh/id_ed25519_sk_backup
+~/.ssh/id_ed25519_sk_backup.pub
+```
+
+The files `id_ed25519_sk_primary` and `id_ed25519_sk_backup` do **not** contain actual private keys.
+
+The real private keys:
+
+- Are generated inside the FIDO2 device
+- Never leave the hardware
+- Cannot be extracted
+
+The files on disk only contain:
+
+- A key handle
+- Metadata
+- A reference to the hardware key
+
+Without the physical YubiKey (and your PIN), authentication is impossible. These stub files are safe to back up — they are useless without the corresponding YubiKey.
+
+---
+
+## 9. Recovery
+
+If you lose the stub private key or public key files, you can recover them from the YubiKey.
+
+Plug in the YubiKey and run in **Administrator PowerShell**:
+
+```powershell
+ssh-keygen -K
+```
+
+This downloads all resident credentials from the connected YubiKey into the current directory. Copy the recovered files back into WSL2's `~/.ssh/` as described in Section 4.
+
+</PostLayout>
