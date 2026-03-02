@@ -8,6 +8,7 @@ export type PostMeta = {
   publishedAt: string
   summary: string
   image?: string
+  tags?: { name: string; color?: string }[]
 }
 
 export function getBlogPosts(): { metadata: PostMeta; slug: string }[] {
@@ -59,11 +60,13 @@ export function postMetadata(meta: PostMeta): Metadata {
   return {
     title: meta.title,
     description: meta.summary,
+    ...(meta.tags?.length && { keywords: meta.tags.map((t) => t.name) }),
     openGraph: {
       title: meta.title,
       description: meta.summary,
       type: 'article',
       publishedTime: meta.publishedAt,
+      ...(meta.tags?.length && { tags: meta.tags.map((t) => t.name) }),
       images: [{ url: ogImage }],
     },
     twitter: {

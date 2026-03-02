@@ -26,6 +26,7 @@ export async function GET() {
         <link>${siteConfig.baseUrl}/blog/${post.slug}</link>
         <description>${escapeXml(post.metadata.summary || '')}</description>
         <pubDate>${new Date(post.metadata.publishedAt).toUTCString()}</pubDate>
+        ${(post.metadata.tags ?? []).map((tag) => `<category>${escapeXml(tag.name)}</category>`).join('\n        ')}
       </item>`
     )
     .join('\n')

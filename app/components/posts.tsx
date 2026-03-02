@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { formatDate, getBlogPosts } from '@/app/blog/utils'
+import { Tag } from '@/app/components/tag'
 
 export function BlogPosts() {
   const allBlogs = getBlogPosts()
@@ -26,6 +27,13 @@ export function BlogPosts() {
                 {post.metadata.title}
               </p>
             </div>
+            {post.metadata.tags?.length && (
+              <div className="flex flex-wrap gap-1">
+                {post.metadata.tags.map((tag) => (
+                  <Tag key={tag.name} tag={tag.name} color={tag.color} size="sm" />
+                ))}
+              </div>
+            )}
           </Link>
         ))}
     </div>
