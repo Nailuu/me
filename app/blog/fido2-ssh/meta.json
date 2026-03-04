@@ -3,6 +3,7 @@
   "publishedAt": "2026-02-25",
   "summary": "Set up FIDO2 SSH keys on YubiKeys for GitHub, generating them on Windows and using them from WSL2.",
   "tags": [
+    { "name": "yubikey", "color": "green" },
     { "name": "fido2", "color": "orange" },
     { "name": "ssh", "color": "purple" },
     { "name": "wsl", "color": "blue" }

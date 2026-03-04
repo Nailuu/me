@@ -1,6 +1,6 @@
-export type TagColor = 'blue' | 'teal' | 'green' | 'amber' | 'orange' | 'rose' | 'purple' | 'indigo'
+import { type TagColor, tagColors, resolveTagColor } from './tag-colors'
 
-const palette: Record<TagColor, string> = {
+const twPalette: Record<TagColor, string> = {
   blue: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
   teal: 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300',
   green: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
@@ -11,15 +11,7 @@ const palette: Record<TagColor, string> = {
   indigo: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300',
 }
 
-const colorNames = Object.keys(palette) as TagColor[]
-
-function hashTag(tag: string): TagColor {
-  let hash = 0
-  for (let i = 0; i < tag.length; i++) {
-    hash = (hash * 31 + tag.charCodeAt(i)) | 0
-  }
-  return colorNames[Math.abs(hash) % colorNames.length]
-}
+export { type TagColor, tagColors, resolveTagColor }
 
 export function Tag({
   tag,
@@ -30,13 +22,13 @@ export function Tag({
   color?: string
   size?: 'sm' | 'default'
 }) {
-  const resolved = color && color in palette ? color as TagColor : hashTag(tag)
+  const resolved = resolveTagColor(tag, color)
   const sizeClasses = size === 'sm'
     ? 'text-xs px-1.5 py-0.5'
     : 'text-sm px-2 py-0.5'
 
   return (
-    <span className={`inline-block rounded-full font-medium ${sizeClasses} ${palette[resolved]}`}>
+    <span className={`inline-block rounded-full font-medium ${sizeClasses} ${twPalette[resolved]}`}>
       {tag}
     </span>
   )

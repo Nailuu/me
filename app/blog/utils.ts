@@ -56,7 +56,11 @@ export function formatDate(date: string, includeRelative = false): string {
 }
 
 export function postMetadata(meta: PostMeta): Metadata {
-  const ogImage = meta.image ?? `${siteConfig.baseUrl}/og?title=${encodeURIComponent(meta.title)}`
+  let ogUrl = `${siteConfig.baseUrl}/og?title=${encodeURIComponent(meta.title)}`
+  if (meta.tags?.length) {
+    ogUrl += `&tags=${encodeURIComponent(JSON.stringify(meta.tags.map((t) => ({ n: t.name, c: t.color }))))}`
+  }
+  const ogImage = meta.image ?? ogUrl
   return {
     title: meta.title,
     description: meta.summary,
