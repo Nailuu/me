@@ -12,8 +12,8 @@ export default function Footer() {
             target="_blank"
             href="/rss"
           >
-            <Rss size={14} />
-            <p className="ml-2 h-7">rss</p>
+            <Rss size={14} className="translate-y-px" />
+            <span className="ml-2">rss</span>
           </a>
         </li>
         <li>
@@ -23,8 +23,8 @@ export default function Footer() {
             target="_blank"
             href={siteConfig.github}
           >
-            <Github size={14} />
-            <p className="ml-2 h-7">github</p>
+            <Github size={14} className="translate-y-px" />
+            <span className="ml-2">github</span>
           </a>
         </li>
         <li>
@@ -33,8 +33,8 @@ export default function Footer() {
             rel="noopener noreferrer"
             href={`mailto:${siteConfig.email}`}
           >
-            <Mail size={14} />
-            <p className="ml-2 h-7">email</p>
+            <Mail size={14} className="translate-y-px" />
+            <span className="ml-2">email</span>
           </a>
         </li>
       </ul>

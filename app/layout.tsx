@@ -3,6 +3,7 @@ import { Onest, IBM_Plex_Mono } from 'next/font/google'
 import { Navbar } from '@/app/components/nav'
 import Footer from '@/app/components/footer'
 import { ThemeProvider } from '@/app/components/theme-provider'
+import { SmoothScroll } from '@/app/components/smooth-scroll'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { siteConfig } from '@/app/config'
@@ -61,23 +62,25 @@ export default function RootLayout({
       className={`scheme-light dark:scheme-dark bg-background text-foreground ${onest.variable} ${ibmPlexMono.variable}`}
     >
       <body className="antialiased max-w-xl mx-4 mt-8 lg:mx-auto">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <TooltipProvider>
-            <main className="flex-auto min-w-0 mt-6 flex flex-col px-2 md:px-0">
-              <Navbar />
-              <SpeedInsights />
-              <Analytics />
-              {children}
-              <Footer />
-            </main>
-            <Toaster />
-          </TooltipProvider>
-        </ThemeProvider>
+        <SmoothScroll>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <TooltipProvider>
+              <main className="flex-auto min-w-0 mt-6 flex flex-col px-2 md:px-0">
+                <Navbar />
+                <SpeedInsights />
+                <Analytics />
+                {children}
+                <Footer />
+              </main>
+              <Toaster />
+            </TooltipProvider>
+          </ThemeProvider>
+        </SmoothScroll>
       </body>
     </html>
   )

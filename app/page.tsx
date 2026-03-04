@@ -11,10 +11,10 @@ export default function Home() {
         {`I'm a Full-Stack Developer working in FinTech in Luxembourg.`}
       </p>
       <p className="mb-4">
-        {`This site is where I showcase the projects I'm most proud of and write about the technical problems I run into — whether it's a tricky bug, an infrastructure headache, or something new I figured out along the way.`}
+        {`This site is where I showcase the projects I'm most proud of and write about the technical problems I run into, whether it's a tricky bug, an infrastructure headache, or something new I figured out along the way.`}
       </p>
       <p className="mb-4">
-        {`It's where I document what I learn — for future me, and for anyone facing the same issues. If something here saves you a few hours of debugging, even better.`}
+        {`It's where I document what I learn, for future me and for anyone facing the same issues. If something here saves you a few hours of debugging, even better.`}
       </p>
       <div className="my-8">
         <h2 className="font-semibold text-xl mb-4 tracking-tighter">Projects</h2>

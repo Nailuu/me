@@ -53,7 +53,7 @@ Reference: [Upgrade in-box OpenSSH to the latest release](https://learn.microsof
 
 ## 3. Generate SSH Keys on Windows
 
-Open an **Administrator PowerShell**. You will create two keys — one for each YubiKey.
+Open an **Administrator PowerShell**. You will create two keys, one for each YubiKey.
 
 ### Primary YubiKey
 
@@ -117,7 +117,7 @@ Host github.com
     User git
 ```
 
-SSH tries keys in the order they appear in the config file. Put the YubiKey you use most often first — SSH will try it before falling back to the other.
+SSH tries keys in the order they appear in the config file. Put the YubiKey you use most often first. SSH will try it before falling back to the other.
 
 ---
 
@@ -138,7 +138,7 @@ Both keys are now authorized for your GitHub account.
 ssh -T git@github.com
 ```
 
-SSH will try each key in config file order. Plug in the corresponding YubiKey — you will be prompted for a touch. On success:
+SSH will try each key in config file order. Plug in the corresponding YubiKey and you will be prompted for a touch. On success:
 
 ```
 Hi <username>! You've successfully authenticated, but GitHub does not provide shell access.
@@ -171,7 +171,7 @@ The files on disk only contain:
 - Metadata
 - A reference to the hardware key
 
-Without the physical YubiKey (and your PIN), authentication is impossible. These stub files are safe to back up — they are useless without the corresponding YubiKey.
+Without the physical YubiKey (and your PIN), authentication is impossible. These stub files are safe to back up since they are useless without the corresponding YubiKey.
 
 ---
 

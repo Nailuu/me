@@ -12,13 +12,13 @@ export const metadata = projectMetadata(meta)
 
 If you're using Claude Code CLI on WSL, you've probably hit the same wall I did: you take a screenshot on Windows, try to paste it into Claude Code... and nothing happens. There's no way to get images from the Windows clipboard into a WSL terminal.
 
-Now, there are workarounds. Some people report that `ALT+V` works for pasting images — but for others, including me, it simply doesn't. There's an [open GitHub issue](https://github.com/anthropics/claude-code/issues/13738) about it with plenty of people reporting the same problem, and as of now there's still no built-in fix.
+Now, there are workarounds. Some people report that `ALT+V` works for pasting images, but for others, including me, it simply doesn't. There's an [open GitHub issue](https://github.com/anthropics/claude-code/issues/13738) about it with plenty of people reporting the same problem, and as of now there's still no built-in fix.
 
-You can also drag & drop an image file into the terminal, and that does work. But it means opening your screenshot folder, finding the right file, and dragging it in — every single time. When you're someone who works on UI regularly and sends screenshots at nearly every prompt, that gets old incredibly fast.
+You can also drag & drop an image file into the terminal, and that does work. But it means opening your screenshot folder, finding the right file, and dragging it in every single time. When you're someone who works on UI regularly and sends screenshots at nearly every prompt, that gets old incredibly fast.
 
 This was driving me crazy. I use Claude Code daily and constantly want to share screenshots of errors, UI issues, or designs. Every time, I had to break my flow to manually deal with files. Killed my productivity completely.
 
-So I built **wsl-screenshot-cli** — a lightweight daemon that monitors your Windows clipboard for screenshots and automatically makes them available as file paths in WSL.
+So I built **wsl-screenshot-cli**, a lightweight daemon that monitors your Windows clipboard for screenshots and automatically makes them available as file paths in WSL.
 
 ---
 
@@ -85,11 +85,11 @@ Or auto-start/stop with [Claude Code hooks](https://code.claude.com/docs/en/hook
 
 ## Key Technical Highlights
 
-### Three Clipboard Formats — Preserving Native Paste Everywhere
+### Three Clipboard Formats: Preserving Native Paste Everywhere
 
-Other tools that solve this problem monitor the Windows screenshot auto-save folder — but there's no official Windows API to reliably get that folder path, making them fragile. My approach: instead of watching files, intercept at the clipboard level using `AddClipboardFormatListener` (Win32 event-driven API).
+Other tools that solve this problem monitor the Windows screenshot auto-save folder, but there's no official Windows API to reliably get that folder path, making them fragile. My approach: instead of watching files, intercept at the clipboard level using `AddClipboardFormatListener` (Win32 event-driven API).
 
-The key R&D insight: set **three clipboard formats simultaneously** — `CF_UNICODETEXT` (WSL file path), `CF_BITMAP` (image), `CF_HDROP` (file drop). This preserves native paste behavior: paste in Teams/Slack/Paint → image, paste in Explorer → file, paste in WSL terminal → file path.
+The key R&D insight: set **three clipboard formats simultaneously**: `CF_UNICODETEXT` (WSL file path), `CF_BITMAP` (image), `CF_HDROP` (file drop). This preserves native paste behavior: paste in Teams/Slack/Paint → image, paste in Explorer → file, paste in WSL terminal → file path.
 
 Uses the 3-format fingerprint to detect if clipboard still holds our write vs. a new screenshot. Smart dedup restore: even duplicate screenshots (same SHA256) trigger `UpdateClipboard()` to restore formats stripped by Snipping Tool's "Copy" button.
 
@@ -103,7 +103,7 @@ Circuit breaker: after 5 consecutive failures, automatically restarts the PowerS
 
 ### Content-Addressed Storage
 
-Every screenshot is hashed with SHA256 before saving. The hash becomes the filename. This gives you automatic deduplication — take the same screenshot twice, and it only gets stored once.
+Every screenshot is hashed with SHA256 before saving. The hash becomes the filename. This gives you automatic deduplication. Take the same screenshot twice, and it only gets stored once.
 
 ### One-Line Install, Update Detection & Auto-Update
 
