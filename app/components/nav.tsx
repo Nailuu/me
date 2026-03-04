@@ -3,6 +3,7 @@ import { ThemeToggle } from '@/app/components/theme-toggle'
 
 const navItems: Record<string, { name: string }> = {
   '/': { name: 'home' },
+  '/projects': { name: 'projects' },
   '/blog': { name: 'blog' },
 }
 

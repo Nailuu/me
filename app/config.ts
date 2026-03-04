@@ -1,7 +1,7 @@
 export const siteConfig = {
   baseUrl: 'https://nailu.dev',
   name: 'nailu.dev',
-  description: 'This is my portfolio.',
+  description: 'Developer blog. Problems encountered, solutions documented.',
   locale: 'en_US',
   github: 'https://github.com/Nailuu',
   email: 'contact@nailu.dev',

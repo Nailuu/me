@@ -1,5 +1,6 @@
 import { siteConfig } from '@/app/config'
 import { getBlogPosts } from '@/app/blog/utils'
+import { getProjects } from '@/app/projects/utils'
 
 function escapeXml(str: string): string {
   return str
@@ -11,22 +12,31 @@ function escapeXml(str: string): string {
 }
 
 export async function GET() {
-  const allBlogs = getBlogPosts()
+  const allBlogs = getBlogPosts().map((post) => ({
+    ...post,
+    type: 'blog' as const,
+  }))
+  const allProjects = getProjects().map((project) => ({
+    ...project,
+    type: 'projects' as const,
+  }))
 
-  const itemsXml = allBlogs
+  const allItems = [...allBlogs, ...allProjects]
+
+  const itemsXml = allItems
     .sort((a, b) =>
       new Date(a.metadata.publishedAt) > new Date(b.metadata.publishedAt)
         ? -1
         : 1
     )
     .map(
-      (post) =>
+      (item) =>
         `<item>
-        <title>${escapeXml(post.metadata.title)}</title>
-        <link>${siteConfig.baseUrl}/blog/${post.slug}</link>
-        <description>${escapeXml(post.metadata.summary || '')}</description>
-        <pubDate>${new Date(post.metadata.publishedAt).toUTCString()}</pubDate>
-        ${(post.metadata.tags ?? []).map((tag) => `<category>${escapeXml(tag.name)}</category>`).join('\n        ')}
+        <title>${escapeXml(item.metadata.title)}</title>
+        <link>${siteConfig.baseUrl}/${item.type}/${item.slug}</link>
+        <description>${escapeXml(item.metadata.summary || '')}</description>
+        <pubDate>${new Date(item.metadata.publishedAt).toUTCString()}</pubDate>
+        ${(item.metadata.tags ?? []).map((tag) => `<category>${escapeXml(tag.name)}</category>`).join('\n        ')}
       </item>`
     )
     .join('\n')

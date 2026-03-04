@@ -4,6 +4,7 @@ import { Navbar } from '@/app/components/nav'
 import Footer from '@/app/components/footer'
 import { ThemeProvider } from '@/app/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { siteConfig } from '@/app/config'
 import './globals.css'
 import { Analytics } from '@vercel/analytics/next'
@@ -66,14 +67,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <main className="flex-auto min-w-0 mt-6 flex flex-col px-2 md:px-0">
-            <Navbar />
-            <SpeedInsights />
-            <Analytics />
-            {children}
-            <Footer />
-          </main>
-          <Toaster />
+          <TooltipProvider>
+            <main className="flex-auto min-w-0 mt-6 flex flex-col px-2 md:px-0">
+              <Navbar />
+              <SpeedInsights />
+              <Analytics />
+              {children}
+              <Footer />
+            </main>
+            <Toaster />
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>
