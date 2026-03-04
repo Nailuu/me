@@ -6,6 +6,8 @@ import { ThemeProvider } from '@/app/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 import { siteConfig } from '@/app/config'
 import './globals.css'
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const onest = Onest({
   variable: '--font-onest',
@@ -66,6 +68,8 @@ export default function RootLayout({
         >
           <main className="flex-auto min-w-0 mt-6 flex flex-col px-2 md:px-0">
             <Navbar />
+            <SpeedInsights />
+            <Analytics />
             {children}
             <Footer />
           </main>
