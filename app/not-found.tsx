@@ -1,10 +1,14 @@
+import ASCII404 from '@/app/components/ascii-404'
+
 export default function NotFound() {
   return (
-    <section>
-      <h1 className="mb-8 text-2xl font-semibold tracking-tighter">
-        404 - Page Not Found
-      </h1>
-      <p className="mb-4">The page you are looking for does not exist.</p>
+    <section className="flex flex-col items-center justify-center py-16">
+      <div className="mb-8 w-full">
+        <ASCII404 />
+      </div>
+      <p className="text-muted-foreground text-center">
+        This page doesn&apos;t exist. Maybe it was moved, or maybe it never was.
+      </p>
     </section>
   )
 }
