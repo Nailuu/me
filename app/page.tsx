@@ -9,7 +9,7 @@ export default function Home() {
         Hey, I'm Julian
       </h1>
       <p className="mb-4">
-        {`I'm a Full-Stack Developer working in FinTech in Luxembourg, and a former 42 student.`}
+        {`I'm a Full-Stack Developer working in Luxembourg, and a former 42 student.`}
       </p>
       <p className="mb-4">
         {`This site is where I showcase the projects I'm most proud of and write about the technical problems I run into, whether it's a tricky bug, an infrastructure headache, or something new I figured out along the way.`}
