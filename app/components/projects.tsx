@@ -27,13 +27,13 @@ export function ProjectPosts() {
                 {project.metadata.title}
               </p>
             </Link>
-            {project.metadata.tags && project.metadata.tags.length > 0 && (
+            {/* {project.metadata.tags && project.metadata.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {project.metadata.tags.map((t) => (
                   <Tag key={t.name} tag={t.name} color={t.color} size="sm" />
                 ))}
               </div>
-            )}
+            )} */}
           </div>
         ))}
     </div>

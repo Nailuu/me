@@ -27,13 +27,13 @@ export function BlogPosts() {
                 {post.metadata.title}
               </p>
             </div>
-            {post.metadata.tags && post.metadata.tags.length > 0 && (
+            {/* {post.metadata.tags && post.metadata.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {post.metadata.tags.map((t) => (
                   <Tag key={t.name} tag={t.name} color={t.color} size="sm" />
                 ))}
               </div>
-            )}
+            )} */}
           </Link>
         ))}
     </div>

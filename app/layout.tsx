@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from "next/script";
 import { Onest, IBM_Plex_Mono } from 'next/font/google'
 import { Navbar } from '@/app/components/nav'
 import Footer from '@/app/components/footer'
@@ -61,6 +62,15 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`scheme-light dark:scheme-dark bg-background text-foreground ${onest.variable} ${ibmPlexMono.variable}`}
     >
+      <head>
+        {process.env.NODE_ENV === "development" && (
+          <Script
+            src="//unpkg.com/react-grab/dist/index.global.js"
+            crossOrigin="anonymous"
+            strategy="beforeInteractive"
+          />
+        )}
+      </head>
       <body className="antialiased max-w-xl mx-4 mt-8 lg:mx-auto">
         <SmoothScroll>
           <ThemeProvider
