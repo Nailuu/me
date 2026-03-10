@@ -3,6 +3,6 @@ export const siteConfig = {
   name: 'nailu.dev',
   description: 'Developer blog. Problems encountered, solutions documented.',
   locale: 'en_US',
-  github: 'https://github.com/Nailuu',
-  email: 'contact@nailu.dev',
+  github: 'https://github.com/nailuu',
+  email: 'julian@nailu.dev',
 } as const

@@ -70,6 +70,12 @@ export default function RootLayout({
             strategy="beforeInteractive"
           />
         )}
+        {process.env.NODE_ENV === "development" && (
+          <Script
+            src="//unpkg.com/@react-grab/claude-code/dist/client.global.js"
+            strategy="lazyOnload"
+          />
+        )}
       </head>
       <body className="antialiased max-w-xl mx-4 mt-8 lg:mx-auto">
         <SmoothScroll>
