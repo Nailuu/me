@@ -24,7 +24,7 @@ So I built **wsl-screenshot-cli**, a lightweight daemon that monitors your Windo
 
 ## How It Works
 
-A persistent `powershell.exe -STA` subprocess handles all clipboard access via a custom stdin/stdout text protocol (`CHECK` / `UPDATE` / `EXIT`). PowerShell registers an `AddClipboardFormatListener` window to receive `WM_CLIPBOARDUPDATE` events instead of polling, and pumps Windows messages via `DoEvents()` to keep the STA thread responsive. When a new bitmap is detected, it saves the PNG (deduplicated by SHA256 hash) and sets three clipboard formats at once:
+A persistent `powershell.exe -STA` subprocess handles all clipboard access via a custom stdin/stdout text protocol (`CHECK` / `UPDATE` / `EXIT`). It originally used a runtime-compiled C# `ClipboardListener` class (via `Add-Type -TypeDefinition`) with `AddClipboardFormatListener` for event-driven clipboard detection. A [community contribution](https://github.com/Nailuu/wsl-screenshot-cli/pull/4) switched to pre-compiled .NET Clipboard APIs (`ContainsImage()`, `ContainsText()`, `ContainsFileDropList()`) because enterprise EDR software (CrowdStrike, SentinelOne, etc.) blocks `csc.exe`, which `Add-Type` requires for runtime C# compilation. The pre-compiled APIs provide the same detection without needing `csc.exe`. PowerShell pumps Windows messages via `DoEvents()` to keep the STA thread responsive. When a new bitmap is detected, it saves the PNG (deduplicated by SHA256 hash) and sets three clipboard formats at once:
 
 - **`CF_UNICODETEXT`** — WSL path to the PNG, so you can paste in WSL terminals
 - **`CF_BITMAP`** — the original image data, preserving normal image paste
@@ -47,8 +47,10 @@ curl -fsSL https://nailu.dev/wscli/install.sh | bash
 Then add it to your `.bashrc` and forget about it:
 
 ```bash
-wsl-screenshot-cli start --daemon
+wsl-screenshot-cli start --daemon --quiet
 ```
+
+The `--quiet` flag suppresses informational messages when the daemon is already running, keeping your terminal clean on every new shell session.
 
 Or auto-start/stop with [Claude Code hooks](https://code.claude.com/docs/en/hooks) (add to `~/.claude/settings.json`):
 
@@ -87,7 +89,7 @@ Or auto-start/stop with [Claude Code hooks](https://code.claude.com/docs/en/hook
 
 ### Three Clipboard Formats: Preserving Native Paste Everywhere
 
-Other tools that solve this problem monitor the Windows screenshot auto-save folder, but there's no official Windows API to reliably get that folder path, making them fragile. My approach: instead of watching files, intercept at the clipboard level using `AddClipboardFormatListener` (Win32 event-driven API).
+Other tools that solve this problem monitor the Windows screenshot auto-save folder, but there's no official Windows API to reliably get that folder path, making them fragile. My approach: instead of watching files, intercept at the clipboard level using pre-compiled .NET Clipboard APIs (`ContainsImage()`, `ContainsText()`, `ContainsFileDropList()`).
 
 The key R&D insight: set **three clipboard formats simultaneously**: `CF_UNICODETEXT` (WSL file path), `CF_BITMAP` (image), `CF_HDROP` (file drop). This preserves native paste behavior: paste in Teams/Slack/Paint → image, paste in Explorer → file, paste in WSL terminal → file path.
 
@@ -96,6 +98,8 @@ Uses the 3-format fingerprint to detect if clipboard still holds our write vs. a
 ### Persistent PowerShell STA Subprocess with Custom I/O Protocol
 
 Instead of spawning a new PowerShell per operation, keeps a single long-lived `powershell.exe -STA` process. Communicates via a custom text protocol over stdin/stdout: `CHECK` → `NONE` or `IMAGE\n<base64>\nEND`, `UPDATE|wslpath|winpath` → `OK`, `EXIT`.
+
+The clipboard detection initially used a runtime-compiled C# class (`Add-Type -TypeDefinition`) for event-driven clipboard listening, but a [community contribution](https://github.com/Nailuu/wsl-screenshot-cli/pull/4) switched to fully pre-compiled .NET Clipboard APIs for enterprise EDR compatibility — tools like CrowdStrike and SentinelOne block `csc.exe`, which `Add-Type` requires.
 
 STA (Single-Threaded Apartment) mode is required to avoid freezing Windows apps during clipboard access. Pumps Windows messages via `DoEvents()` to keep the STA thread responsive. 32MB scanner buffer to handle base64-encoded 4K screenshots.
 
@@ -119,6 +123,16 @@ Built-in `wsl-screenshot-cli update` command: checks GitHub releases API, compar
 - **Cobra** — command-line interface framework
 - **PowerShell** — Windows clipboard API interop (embedded via `go:embed`)
 - **GoReleaser** — automated cross-platform builds and releases
+
+---
+
+## Community Contributions
+
+The tool has benefited from open-source contributions that improved real-world compatibility:
+
+- **EDR compatibility** — Switched from runtime-compiled C# (`Add-Type`) to pre-compiled .NET Clipboard APIs, fixing silent failures in enterprise environments where EDR software blocks `csc.exe` ([PR #4](https://github.com/Nailuu/wsl-screenshot-cli/pull/4))
+- **`--quiet` flag** — Suppresses informational messages when the daemon is already running, enabling clean `.bashrc`/`.zshrc` autostart ([PR #2](https://github.com/Nailuu/wsl-screenshot-cli/pull/2))
+- **Broader WSL detection** — Added `/proc/version` fallback for WSL environment detection when `wslinfo` flags aren't available ([PR #1](https://github.com/Nailuu/wsl-screenshot-cli/pull/1))
 
 ---
 
